@@ -10,21 +10,31 @@ using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
 using EstateAgency.Infrastructrure.EfCore.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.UseInlineDefinitionsForEnums();
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Estate Agency API",
+        Version = "v1",
+        Description = "Документация по API"
+    });
+    var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
+    foreach (var xmlFile in xmlFiles)
+    {
+        c.IncludeXmlComments(xmlFile, includeControllerXmlComments: true);
+    }
 });
 
 builder.AddSqlServerDbContext<EstateAgencyDbContext>("DefaultConnection");

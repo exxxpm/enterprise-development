@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using EstateAgency.Application.Contracts.Counterparty;
-using EstateAgency.Application.Contracts.Interfaces;
 using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Domain;
 using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain.Enums;
-using System.Linq;
 
 namespace EstateAgency.Application.Services;
 
@@ -88,27 +86,22 @@ public class AnalyticService(
             .Select(a => counterparties.First(c => c.Id == a.CounterpartyId))
             .Distinct()
             .Select(c => new ClientWithMinRequestDto(
-                Client: mapper.Map<CounterpartyGetDto>(c),
-                MinRequestTotalCost: minCost
+                mapper.Map<CounterpartyGetDto>(c),
+                minCost
             ))
             .ToList();
 
         return clients;
     }
 
-    public async Task<List<CounterpartyGetDto>> PropertyTypeCountAsync(string propertyType)
+    public async Task<List<CounterpartyGetDto>> PropertyTypeCountAsync(PropertyType propertyType)
     {
-        if (!Enum.TryParse<PropertyType>(propertyType, ignoreCase: true, out var propertyTypeEnum))
-        {
-            throw new ArgumentException($"Invalid property type: {propertyType}");
-        }
-
         var applications = await applicationRepo.GetAllAsync();
         var counterparties = await counterpartyRepo.GetAllAsync();
         var properties = await propertyRepo.GetAllAsync();
 
         var clients = applications
-            .Where(a => properties.First(p => p.Id == a.PropertyId).Type == propertyTypeEnum)
+            .Where(a => properties.First(p => p.Id == a.PropertyId).Type == propertyType)
             .Select(a => counterparties.First(c => c.Id == a.CounterpartyId))
             .Distinct()
             .OrderBy(c => c.FullName)

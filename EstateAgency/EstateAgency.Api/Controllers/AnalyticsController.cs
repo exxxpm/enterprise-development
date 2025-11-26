@@ -1,6 +1,7 @@
 ﻿using EstateAgency.Application.Contracts.Counterparty;
 using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Application.Services;
+using EstateAgency.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EstateAgency.Api.Controllers;
@@ -38,16 +39,9 @@ public class AnalyticsController(AnalyticService analyticService) : ControllerBa
     }
 
     [HttpGet("clients-by-property-type/{propertyType}")]
-    public async Task<ActionResult<List<CounterpartyGetDto>>> GetClientsByPropertyType(string propertyType)
+    public async Task<ActionResult<List<CounterpartyGetDto>>> GetClientsByPropertyType(PropertyType propertyType)
     {
-        try
-        {
-            var clients = await analyticService.PropertyTypeCountAsync(propertyType);
-            return Ok(clients);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { ex.Message });
-        }
+        var clients = await analyticService.PropertyTypeCountAsync(propertyType);
+        return Ok(clients);
     }
 }
