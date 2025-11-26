@@ -28,7 +28,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Estate Agency API",
         Version = "v1",
-        Description = "Документация по API"
+        Description = "API Documentation"
     });
     var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
     foreach (var xmlFile in xmlFiles)
