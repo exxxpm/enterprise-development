@@ -37,6 +37,8 @@ builder.Services.AddScoped<ICrudService<ApplicationGetDto, ApplicationCreateEdit
 builder.Services.AddScoped<ICrudService<PropertyGetDto, PropertyCreateEditDto>, PropertyService>();
 builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEditDto>, CounterpartyService>();
 
+builder.Services.AddScoped<AnalyticService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
