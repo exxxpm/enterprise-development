@@ -3,8 +3,14 @@ using EstateAgency.Domain.Enums;
 
 namespace EstateAgency.Domain.Tests;
 
+/// <summary>
+/// Unit tests for domain logic using seeded data, verifying application queries, client statistics, and property-related aggregations.
+/// </summary>
 public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
 {
+    /// <summary>
+    /// Tests retrieval of counterparties who have sale applications within a specified period.
+    /// </summary>
     [Fact]
     public void GetSellersByPeriod()
     {
@@ -24,6 +30,9 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         Assert.Equal(expectedCount, sellers.Count);
     }
 
+    /// <summary>
+    /// Tests retrieval of top 5 clients by number of purchase and sale applications.
+    /// </summary>
     [Fact]
     public void Top5ClientsByApplicationCount()
     {
@@ -49,6 +58,9 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         Assert.NotEmpty(top5Sale);
     }
 
+    /// <summary>
+    /// Tests counting of applications grouped by property type and compares with expected values.
+    /// </summary>
     [Fact]
     public void ApplicationCountByPropertyType()
     {
@@ -65,7 +77,7 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         var counts = data.Applications
             .GroupBy(a => data.Properties.First(p => p.Id == a.PropertyId).Type)
             .ToDictionary(
-                g => g.Key, 
+                g => g.Key,
                 g => g.Count()
             );
 
@@ -76,6 +88,9 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         }
     }
 
+    /// <summary>
+    /// Tests retrieval of counterparties with applications of a minimum specified total cost.
+    /// </summary>
     [Fact]
     public void ClientsWithMinimumApplicationCost()
     {
@@ -95,6 +110,9 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         }
     }
 
+    /// <summary>
+    /// Tests retrieval of counterparties associated with properties of a specific type.
+    /// </summary>
     [Fact]
     public void ClientsByPropertyType()
     {

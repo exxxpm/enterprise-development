@@ -4,8 +4,14 @@ using System.Collections.Generic;
 
 namespace EstateAgency.Domain.Data;
 
+/// <summary>
+/// Provides seed data for testing or initializing the database, including counterparties, properties, and applications.
+/// </summary>
 public class DataSeeder
 {
+    /// <summary>
+    /// Predefined list of counterparties for seeding.
+    /// </summary>
     public readonly List<Counterparty> Counterparties =
     [
         new() 
@@ -80,6 +86,9 @@ public class DataSeeder
         }
     ];
 
+    /// <summary>
+    /// Predefined list of properties for seeding.
+    /// </summary>
     public readonly List<Property> Properties =
     [
         new()
@@ -224,6 +233,9 @@ public class DataSeeder
         }
     ];
 
+    /// <summary>
+    /// Predefined list of applications for seeding.
+    /// </summary>
     public readonly List<Application> Applications =
     [
         new() 
@@ -317,4 +329,3 @@ public class DataSeeder
         }
     ];
 }
-

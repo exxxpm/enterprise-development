@@ -1,10 +1,18 @@
 ﻿using EstateAgency.Domain.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace EstateAgency.Infrastructrure.EfCore.Persistence;
 
+/// <summary>
+/// Provides database seeding functionality for the Estate Agency application.
+/// </summary>
 public static class DbSeeder
 {
+    /// <summary>
+    /// Seeds the database with initial data if the tables are empty.
+    /// Resets entity IDs before adding to ensure new entries.
+    /// </summary>
+    /// <param name="context">The database context to seed.</param>
+    /// <param name="data">The predefined seed data.</param>
     public static void Seed(EstateAgencyDbContext context, DataSeeder data)
     {
         if (context.Counterparties.Any() || context.Properties.Any() || context.Applications.Any())

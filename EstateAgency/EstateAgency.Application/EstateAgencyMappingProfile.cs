@@ -6,6 +6,9 @@ using EstateAgency.Domain.Entitites;
 
 namespace EstateAgency.Application;
 
+/// <summary>
+/// AutoMapper profile for mapping between domain entities and their corresponding DTOs in the Estate Agency application.
+/// </summary>
 public class EstateAgencyMappingProfile : Profile
 {
     public EstateAgencyMappingProfile()
