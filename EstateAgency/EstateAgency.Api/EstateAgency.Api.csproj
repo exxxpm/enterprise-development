@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.5.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EstateAgency.Application\EstateAgency.Application.csproj" />
+    <ProjectReference Include="..\EstateAgency.Infrastructrure.EfCore\EstateAgency.Infrastructrure.EfCore.csproj" />
+    <ProjectReference Include="..\EstateAgency.ServiceDefaults\EstateAgency.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

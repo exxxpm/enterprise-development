@@ -24,5 +24,17 @@ public class EstateAgencyDbContext(DbContextOptions<EstateAgencyDbContext> optio
         modelBuilder.Entity<Property>()
             .Property(p => p.Purpose)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Application>()
+            .HasOne(a => a.Counterparty)
+            .WithMany(c => c.Applications)
+            .HasForeignKey(a => a.CounterpartyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Application>()
+            .HasOne(a => a.Property)
+            .WithMany(p => p.Applications)
+            .HasForeignKey(a => a.PropertyId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

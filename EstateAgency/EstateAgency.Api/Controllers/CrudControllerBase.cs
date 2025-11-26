@@ -56,7 +56,7 @@ public class CrudControllerBase<TEntityGetDto, TEntityCreateEditDto>(
     [HttpDelete("{id}")]
     public virtual async Task<IActionResult> Delete(int id)
     {
-        var deleted = await service.DeleteAsync(id);
+        await service.DeleteAsync(id);
         return NoContent();
     }
 }
