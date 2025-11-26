@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EstateAgency.Infrastructrure.EfCore.Repositories;
 
-
 public class Repository<T>(EstateAgencyDbContext context) : IRepository<T> where T : class
 {
     public async Task<IEnumerable<T>> GetAllAsync() => 
@@ -30,8 +29,7 @@ public class Repository<T>(EstateAgencyDbContext context) : IRepository<T> where
     public async Task<bool> DeleteAsync(T entity)
     {
         context.Set<T>().Remove(entity);
-        var affected = await context.SaveChangesAsync();
-        return affected > 0;
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> ExistsAsync(int id) => 
