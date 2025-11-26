@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EstateAgency.Infrastructrure.EfCore.Migrations
 {
     [DbContext(typeof(EstateAgencyDbContext))]
-    [Migration("20251126123800_InitialCreate")]
+    [Migration("20251126151713_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -61,7 +61,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("application");
+                    b.ToTable("applications");
                 });
 
             modelBuilder.Entity("EstateAgency.Domain.Entitites.Counterparty", b =>
@@ -92,7 +92,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("counterparty");
+                    b.ToTable("counterparties");
                 });
 
             modelBuilder.Entity("EstateAgency.Domain.Entitites.Property", b =>
@@ -139,8 +139,8 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                         .HasColumnName("room_count");
 
                     b.Property<decimal>("TotalArea")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
                         .HasColumnName("total_area");
 
                     b.Property<int>("TotalFloors")
@@ -154,7 +154,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("property");
+                    b.ToTable("properties");
                 });
 
             modelBuilder.Entity("EstateAgency.Domain.Entitites.Application", b =>

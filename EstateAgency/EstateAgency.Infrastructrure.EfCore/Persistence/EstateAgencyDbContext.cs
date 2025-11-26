@@ -5,9 +5,9 @@ namespace EstateAgency.Infrastructrure.EfCore.Persistence;
 
 public class EstateAgencyDbContext(DbContextOptions<EstateAgencyDbContext> options) : DbContext(options)
 {
-    public DbSet<Counterparty> Counterparties => Set<Counterparty>();
-    public DbSet<Property> Properties => Set<Property>();
-    public DbSet<Application> Applications => Set<Application>();
+    public DbSet<Counterparty> Counterparties { get; set; }
+    public DbSet<Property> Properties { get; set; }
+    public DbSet<Application> Applications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,7 +27,7 @@ public class EstateAgencyDbContext(DbContextOptions<EstateAgencyDbContext> optio
 
         modelBuilder.Entity<Property>()
             .Property(p => p.TotalArea)
-            .HasPrecision(5, 2);
+            .HasPrecision(10, 2);
 
         modelBuilder.Entity<Property>()
             .Property(p => p.CeilingHeight)

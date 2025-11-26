@@ -12,7 +12,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "counterparty",
+                name: "counterparties",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -23,11 +23,11 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_counterparty", x => x.id);
+                    table.PrimaryKey("PK_counterparties", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "property",
+                name: "properties",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -37,7 +37,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                     purpose = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     total_floors = table.Column<int>(type: "int", nullable: false),
-                    total_area = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    total_area = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     room_count = table.Column<int>(type: "int", nullable: false),
                     ceiling_height = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
                     floor = table.Column<int>(type: "int", nullable: false),
@@ -45,11 +45,11 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_property", x => x.id);
+                    table.PrimaryKey("PK_properties", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "application",
+                name: "applications",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -62,29 +62,29 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_application", x => x.id);
+                    table.PrimaryKey("PK_applications", x => x.id);
                     table.ForeignKey(
-                        name: "FK_application_counterparty_counterparty_id",
+                        name: "FK_applications_counterparties_counterparty_id",
                         column: x => x.counterparty_id,
-                        principalTable: "counterparty",
+                        principalTable: "counterparties",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_application_property_property_id",
+                        name: "FK_applications_properties_property_id",
                         column: x => x.property_id,
-                        principalTable: "property",
+                        principalTable: "properties",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_application_counterparty_id",
-                table: "application",
+                name: "IX_applications_counterparty_id",
+                table: "applications",
                 column: "counterparty_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_application_property_id",
-                table: "application",
+                name: "IX_applications_property_id",
+                table: "applications",
                 column: "property_id");
         }
 
@@ -92,13 +92,13 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "application");
+                name: "applications");
 
             migrationBuilder.DropTable(
-                name: "counterparty");
+                name: "counterparties");
 
             migrationBuilder.DropTable(
-                name: "property");
+                name: "properties");
         }
     }
 }

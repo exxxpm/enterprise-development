@@ -27,6 +27,10 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
         {
             return BadRequest(new { ex.Message });
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -39,7 +43,11 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
         }
         catch (KeyNotFoundException ex)
         {
-            return BadRequest(new { Message = ex.Message });
+            return BadRequest(new { ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { ex.Message });
         }
     }
 }

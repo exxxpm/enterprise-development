@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EstateAgency.Domain.Entitites;
 
-[Table("property")]
+[Table("properties")]
 public class Property
 {
     [Key]

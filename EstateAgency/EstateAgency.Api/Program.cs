@@ -9,6 +9,7 @@ using EstateAgency.Domain.Data;
 using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
 using EstateAgency.Infrastructrure.EfCore.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,7 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 });
 
-builder.Services.AddSqlServer<EstateAgencyDbContext>("DefaultConnection");
+builder.AddSqlServerDbContext<EstateAgencyDbContext>("DefaultConnection");
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
 
@@ -41,6 +42,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EstateAgencyDbContext>();
+    dbContext.Database.Migrate();
     DbSeeder.Seed(dbContext, new DataSeeder());
 }
 
@@ -54,7 +56,6 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Estate Agency v1");
     });
 }
-
 
 app.UseHttpsRedirection();
 

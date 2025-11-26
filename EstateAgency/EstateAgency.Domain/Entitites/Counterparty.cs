@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EstateAgency.Domain.Entitites;
 
-[Table("counterparty")]
+[Table("counterparties")]
 public class Counterparty
 {
     [Key]
     [Column("id")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     [MaxLength(100)]
     [Column("full_name")]

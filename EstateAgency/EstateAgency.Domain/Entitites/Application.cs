@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EstateAgency.Domain.Entitites;
 
-[Table("application")]
+[Table("applications")]
 public class Application
 {
     [Key]
