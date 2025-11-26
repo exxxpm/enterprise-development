@@ -8,7 +8,8 @@ public class Application
     public required int PropertyId { get; set; }
     public required ApplicationType Type { get; set; }
     public required int TotalCost { get; set; }
-    
+    public required DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
     public virtual Counterparty? Counterparty { get; set; }
     public virtual Property? Property { get; set; }
 }

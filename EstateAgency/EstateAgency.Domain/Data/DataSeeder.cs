@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace EstateAgency.Domain.Data;
 
-public static class DataSeeder
+public class DataSeeder
 {
-    public static readonly List<Counterparty> Counterparties =
+    public readonly List<Counterparty> Counterparties =
     [
         new() 
         { 
@@ -80,7 +80,7 @@ public static class DataSeeder
         }
     ];
 
-    public static readonly List<Property> Properties =
+    public readonly List<Property> Properties =
     [
         new()
         {
@@ -224,7 +224,7 @@ public static class DataSeeder
         }
     ];
 
-    public static readonly List<Application> Applications =
+    public readonly List<Application> Applications =
     [
         new() 
         { 
@@ -232,7 +232,8 @@ public static class DataSeeder
             CounterpartyId = 1,
             PropertyId = 1, 
             Type = ApplicationType.Purchase,
-            TotalCost = 50000 
+            TotalCost = 50000,
+            CreatedAt = new DateOnly(2025, 1, 5)
         },
         new() 
         { 
@@ -240,7 +241,8 @@ public static class DataSeeder
             CounterpartyId = 2, 
             PropertyId = 2, 
             Type = ApplicationType.Sale, 
-            TotalCost = 180000
+            TotalCost = 180000,
+            CreatedAt = new DateOnly(2025, 2, 10)
         },
         new() 
         { 
@@ -248,14 +250,16 @@ public static class DataSeeder
             CounterpartyId = 3, 
             PropertyId = 3, 
             Type = ApplicationType.Purchase, 
-            TotalCost = 95000 
+            TotalCost = 95000,
+            CreatedAt = new DateOnly(2025, 3, 15)
         },
         new() 
         { 
             Id = 4, CounterpartyId = 4,
             PropertyId = 4, 
             Type = ApplicationType.Purchase, 
-            TotalCost = 220000 
+            TotalCost = 220000,
+            CreatedAt = new DateOnly(2025, 4, 20)
         },
         new() 
         { 
@@ -263,7 +267,8 @@ public static class DataSeeder
             CounterpartyId = 5, 
             PropertyId = 5,
             Type = ApplicationType.Sale,
-            TotalCost = 300000
+            TotalCost = 300000,
+            CreatedAt = new DateOnly(2025, 5, 25)
         },
         new()
         { 
@@ -271,7 +276,8 @@ public static class DataSeeder
             CounterpartyId = 6, 
             PropertyId = 6, 
             Type = ApplicationType.Purchase, 
-            TotalCost = 70000 
+            TotalCost = 70000,
+            CreatedAt = new DateOnly(2025, 6, 30)
         },
         new() 
         { 
@@ -279,7 +285,8 @@ public static class DataSeeder
             CounterpartyId = 7, 
             PropertyId = 7, 
             Type = ApplicationType.Sale,
-            TotalCost = 260000
+            TotalCost = 260000,
+            CreatedAt = new DateOnly(2025, 7, 5)
         },
         new() 
         { 
@@ -287,7 +294,8 @@ public static class DataSeeder
             CounterpartyId = 8,
             PropertyId = 8,
             Type = ApplicationType.Purchase,
-            TotalCost = 120000 
+            TotalCost = 120000,
+            CreatedAt = new DateOnly(2025, 8, 10)
         },
         new()
         { 
@@ -295,7 +303,8 @@ public static class DataSeeder
             CounterpartyId = 9, 
             PropertyId = 9, 
             Type = ApplicationType.Sale,
-            TotalCost = 450000 
+            TotalCost = 450000,
+            CreatedAt = new DateOnly(2025, 9, 15)
         },
         new()
         { 
@@ -303,7 +312,8 @@ public static class DataSeeder
             CounterpartyId = 10,
             PropertyId = 10, 
             Type = ApplicationType.Purchase,
-            TotalCost = 85000 
+            TotalCost = 85000,
+            CreatedAt = new DateOnly(2025, 10, 20)
         }
     ];
 }
