@@ -25,6 +25,14 @@ public class EstateAgencyDbContext(DbContextOptions<EstateAgencyDbContext> optio
             .Property(p => p.Purpose)
             .HasConversion<string>();
 
+        modelBuilder.Entity<Property>()
+            .Property(p => p.TotalArea)
+            .HasPrecision(5, 2);
+
+        modelBuilder.Entity<Property>()
+            .Property(p => p.CeilingHeight)
+            .HasPrecision(5, 2);
+
         modelBuilder.Entity<Application>()
             .HasOne(a => a.Counterparty)
             .WithMany(c => c.Applications)
