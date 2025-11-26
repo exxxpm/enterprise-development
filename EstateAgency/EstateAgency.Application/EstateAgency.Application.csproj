@@ -10,4 +10,13 @@
     <PackageReference Include="AutoMapper" Version="15.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EstateAgency.Application.Contracts\EstateAgency.Application.Contracts.csproj" />
+    <ProjectReference Include="..\EstateAgency.Domain\EstateAgency.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Application", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Application.Contracts", "EstateAgency.Application.Contracts\EstateAgency.Application.Contracts.csproj", "{B35BDDF3-FAFB-41BD-8388-EC6450D000E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Api", "EstateAgency.Api\EstateAgency.Api.csproj", "{91A5E14B-EE2E-46D7-8DA4-BE54412D3260}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B35BDDF3-FAFB-41BD-8388-EC6450D000E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B35BDDF3-FAFB-41BD-8388-EC6450D000E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B35BDDF3-FAFB-41BD-8388-EC6450D000E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91A5E14B-EE2E-46D7-8DA4-BE54412D3260}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91A5E14B-EE2E-46D7-8DA4-BE54412D3260}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91A5E14B-EE2E-46D7-8DA4-BE54412D3260}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91A5E14B-EE2E-46D7-8DA4-BE54412D3260}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
