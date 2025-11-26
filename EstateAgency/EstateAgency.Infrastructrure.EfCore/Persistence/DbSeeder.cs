@@ -2,9 +2,9 @@
 
 namespace EstateAgency.Infrastructrure.EfCore.Persistence;
 
-public class DbSeeder(DataSeeder data)
+public static class DbSeeder
 {
-    public void Seed(EstateAgencyDbContext context)
+    public static void Seed(EstateAgencyDbContext context, DataSeeder data)
     {
         if (context.Counterparties.Any() || context.Properties.Any() || context.Applications.Any())
             return;

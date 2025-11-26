@@ -1,4 +1,15 @@
+using EstateAgency.Application;
+using EstateAgency.Application.Contracts.Application;
+using EstateAgency.Application.Contracts.Counterparty;
+using EstateAgency.Application.Contracts.Interfaces;
+using EstateAgency.Application.Contracts.Property;
+using EstateAgency.Application.Services;
+using EstateAgency.Domain;
+using EstateAgency.Domain.Data;
+using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
+using EstateAgency.Infrastructrure.EfCore.Repositories;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,21 +17,44 @@ builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<EstateAgencyDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSwaggerGen(c =>
+{
+    c.UseInlineDefinitionsForEnums();
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+});
+
+builder.Services.AddSqlServer<EstateAgencyDbContext>("DefaultConnection");
+
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<ICrudService<ApplicationGetDto, ApplicationCreateEditDto>, ApplicationService>();
+builder.Services.AddScoped<ICrudService<PropertyGetDto, PropertyCreateEditDto>, PropertyService>();
+builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEditDto>, CounterpartyService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EstateAgencyDbContext>();
+    DbSeeder.Seed(dbContext, new DataSeeder());
+}
+
 app.MapDefaultEndpoints();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Estate Agency v1");
+    });
 }
+
 
 app.UseHttpsRedirection();
 
