@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Domain", "Esta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Domain.Tests", "EstateAgency.Domain.Tests\EstateAgency.Domain.Tests.csproj", "{C4CEB3BA-9009-4A68-829D-B545C18C7D3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstateAgency.Infrastructrure.EfCore", "EstateAgency.Infrastructrure.EfCore\EstateAgency.Infrastructrure.EfCore.csproj", "{283871A2-4E39-4B61-A5F9-F8F1D7900A71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C4CEB3BA-9009-4A68-829D-B545C18C7D3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4CEB3BA-9009-4A68-829D-B545C18C7D3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4CEB3BA-9009-4A68-829D-B545C18C7D3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{283871A2-4E39-4B61-A5F9-F8F1D7900A71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{283871A2-4E39-4B61-A5F9-F8F1D7900A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{283871A2-4E39-4B61-A5F9-F8F1D7900A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{283871A2-4E39-4B61-A5F9-F8F1D7900A71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
