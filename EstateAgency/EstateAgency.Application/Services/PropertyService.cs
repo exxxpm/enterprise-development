@@ -23,25 +23,19 @@ public class PropertyService(
     /// <exception cref="ArgumentException">Thrown if Type or Purpose is invalid.</exception>
     public override async Task<PropertyGetDto> CreateAsync(PropertyCreateEditDto dto)
     {
-        if (!Enum.TryParse<PropertyType>(dto.Type, true, out var parsedType))
+        if (!Enum.TryParse<PropertyType>(dto.Type, true, out _))
         {
             var allowedTypes = string.Join(", ", Enum.GetNames(typeof(PropertyType)));
             throw new ArgumentException($"Invalid PropertyType '{dto.Type}'. Allowed values: {allowedTypes}");
         }
 
-        if (!Enum.TryParse<PropertyPurpose>(dto.Purpose, true, out var parsedPurpose))
+        if (!Enum.TryParse<PropertyPurpose>(dto.Purpose, true, out _))
         {
             var allowedPurposes = string.Join(", ", Enum.GetNames(typeof(PropertyPurpose)));
             throw new ArgumentException($"Invalid PropertyPurpose '{dto.Purpose}'. Allowed values: {allowedPurposes}");
         }
 
-        var entityDto = dto with
-        {
-            Type = parsedType.ToString(),
-            Purpose = parsedPurpose.ToString()
-        };
-
-        return await base.CreateAsync(entityDto);
+        return await base.CreateAsync(dto);
     }
 
     /// <summary>
@@ -65,12 +59,6 @@ public class PropertyService(
             throw new ArgumentException($"Invalid PropertyPurpose '{dto.Purpose}'. Allowed values: {allowedPurposes}");
         }
 
-        var entityDto = dto with
-        {
-            Type = parsedType.ToString(),
-            Purpose = parsedPurpose.ToString()
-        };
-
-        return await base.UpdateAsync(id, entityDto);
+        return await base.UpdateAsync(id, dto);
     }
 }

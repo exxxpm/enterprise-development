@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EstateAgency.Application.Contracts.Counterparty;
+using EstateAgency.Application.Contracts.Interfaces;
 using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Domain;
 using EstateAgency.Domain.Entitites;
@@ -18,7 +19,7 @@ public class AnalyticService(
     IRepository<Domain.Entitites.Application> applicationRepo,
     IRepository<Counterparty> counterpartyRepo,
     IRepository<Property> propertyRepo,
-    IMapper mapper)
+    IMapper mapper) : IAnalyticService
 {
     /// <summary>
     /// Retrieves counterparties who sold properties within a specified period.
@@ -32,8 +33,10 @@ public class AnalyticService(
         var counterparties = await counterpartyRepo.GetAllAsync();
 
         var sellers = applications
-            .Where(a => a.Type == ApplicationType.Sale && a.CreatedAt >= startDate && a.CreatedAt <= endDate)
-            .Select(a => counterparties.First(c => c.Id == a.CounterpartyId))
+            .Where(a => a.Type == ApplicationType.Sale &&
+                        a.CreatedAt >= startDate &&
+                        a.CreatedAt <= endDate)
+            .Select(a => a.Counterparty!)
             .Distinct()
             .ToList();
 
@@ -52,22 +55,22 @@ public class AnalyticService(
 
         var topPurchase = applications
             .Where(a => a.Type == ApplicationType.Purchase)
-            .GroupBy(a => a.CounterpartyId)
+            .GroupBy(a => a.Counterparty)
             .OrderByDescending(g => g.Count())
             .Take(topCount)
             .Select(g => new TopCounterpartyDto(
-                Client: mapper.Map<CounterpartyGetDto>(counterparties.First(c => c.Id == g.Key)),
+                Client: mapper.Map<CounterpartyGetDto>(g.Key),
                 ApplicationCount: g.Count()
             ))
             .ToList();
 
         var topSale = applications
             .Where(a => a.Type == ApplicationType.Sale)
-            .GroupBy(a => a.CounterpartyId)
+            .GroupBy(a => a.Counterparty)
             .OrderByDescending(g => g.Count())
             .Take(topCount)
             .Select(g => new TopCounterpartyDto(
-                Client: mapper.Map<CounterpartyGetDto>(counterparties.First(c => c.Id == g.Key)),
+                Client: mapper.Map<CounterpartyGetDto>(g.Key),
                 ApplicationCount: g.Count()
             ))
             .ToList();
@@ -85,7 +88,7 @@ public class AnalyticService(
         var properties = await propertyRepo.GetAllAsync();
 
         var counts = applications
-            .GroupBy(a => properties.First(p => p.Id == a.PropertyId).Type)
+            .GroupBy(a => a.Property!.Type)
             .Select(g => new PropertyTypeCountDto(
                 PropertyType: g.Key.ToString(),
                 Count: g.Count()
@@ -108,7 +111,7 @@ public class AnalyticService(
 
         var clients = applications
             .Where(a => a.TotalCost == minCost)
-            .Select(a => counterparties.First(c => c.Id == a.CounterpartyId))
+            .Select(a => a.Counterparty)
             .Distinct()
             .Select(c => new ClientWithMinRequestDto(
                 mapper.Map<CounterpartyGetDto>(c),
@@ -131,8 +134,8 @@ public class AnalyticService(
         var properties = await propertyRepo.GetAllAsync();
 
         var clients = applications
-            .Where(a => properties.First(p => p.Id == a.PropertyId).Type == propertyType)
-            .Select(a => counterparties.First(c => c.Id == a.CounterpartyId))
+            .Where(a => a.Property!.Type == propertyType)
+            .Select(a => a.Counterparty!)
             .Distinct()
             .OrderBy(c => c.FullName)
             .ToList();

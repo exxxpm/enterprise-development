@@ -14,48 +14,48 @@ public class Application
     /// Unique identifier of the application.
     /// </summary>
     [Key]
-    [Column("id")]
+    [Column("Id")]
     public required int Id { get; set; }
 
     /// <summary>
     /// Foreign key referencing the associated counterparty.
     /// </summary>
     [ForeignKey(nameof(Counterparty))]
-    [Column("counterparty_id")]
+    [Column("CounterpartyId")]
     public required int CounterpartyId { get; set; }
 
     /// <summary>
     /// Foreign key referencing the associated property.
     /// </summary>
     [ForeignKey(nameof(Property))]
-    [Column("property_id")]
+    [Column("PropertyId")]
     public required int PropertyId { get; set; }
 
     /// <summary>
     /// Type of the application.
     /// </summary>
-    [Column("type")]
+    [Column("Type")]
     public required ApplicationType Type { get; set; }
 
     /// <summary>
     /// Total cost associated with the application.
     /// </summary>
-    [Column("total_cost")]
+    [Column("TotalCost")]
     public required int TotalCost { get; set; }
 
     /// <summary>
     /// Date when the application was created.
     /// </summary>
-    [Column("created_at")]
+    [Column("CreatedAt")]
     public required DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
     /// <summary>
     /// Navigation property to the associated counterparty.
     /// </summary>
-    public virtual Counterparty? Counterparty { get; set; }
+    public Counterparty? Counterparty { get; set; }
 
     /// <summary>
     /// Navigation property to the associated property.
     /// </summary>
-    public virtual Property? Property { get; set; }
+    public Property? Property { get; set; }
 }

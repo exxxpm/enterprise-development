@@ -1,6 +1,6 @@
 ﻿using EstateAgency.Application.Contracts.Counterparty;
+using EstateAgency.Application.Contracts.Interfaces;
 using EstateAgency.Application.Contracts.Property;
-using EstateAgency.Application.Services;
 using EstateAgency.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +11,7 @@ namespace EstateAgency.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/analytics")]
-public class AnalyticsController(AnalyticService analyticService) : ControllerBase
+public class AnalyticsController(IAnalyticService analyticService) : ControllerBase
 {
     /// <summary>
     /// Retrieves counterparties who sold properties within a specified period.

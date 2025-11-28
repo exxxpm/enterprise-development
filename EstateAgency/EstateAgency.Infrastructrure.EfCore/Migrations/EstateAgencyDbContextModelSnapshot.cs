@@ -27,30 +27,30 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CounterpartyId")
                         .HasColumnType("int")
-                        .HasColumnName("counterparty_id");
+                        .HasColumnName("CounterpartyId");
 
                     b.Property<DateOnly>("CreatedAt")
                         .HasColumnType("date")
-                        .HasColumnName("created_at");
+                        .HasColumnName("CreatedAt");
 
                     b.Property<int>("PropertyId")
                         .HasColumnType("int")
-                        .HasColumnName("property_id");
+                        .HasColumnName("PropertyId");
 
                     b.Property<int>("TotalCost")
                         .HasColumnType("int")
-                        .HasColumnName("total_cost");
+                        .HasColumnName("TotalCost");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("type");
+                        .HasColumnName("Type");
 
                     b.HasKey("Id");
 
@@ -66,7 +66,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -74,18 +74,18 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("full_name");
+                        .HasColumnName("FullName");
 
                     b.Property<string>("PassportNumber")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasColumnName("passport_number");
+                        .HasColumnName("PassportNumber");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("phone_number");
+                        .HasColumnName("PhoneNumber");
 
                     b.HasKey("Id");
 
@@ -97,7 +97,7 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -105,53 +105,53 @@ namespace EstateAgency.Infrastructrure.EfCore.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)")
-                        .HasColumnName("address");
+                        .HasColumnName("Address");
 
                     b.Property<string>("CadastralNumber")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("cadastral_number");
+                        .HasColumnName("CadastralNumber");
 
                     b.Property<decimal>("CeilingHeight")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)")
-                        .HasColumnName("ceiling_height");
+                        .HasColumnName("CeilingHeight");
 
                     b.Property<int>("Floor")
                         .HasColumnType("int")
-                        .HasColumnName("floor");
+                        .HasColumnName("Floor");
 
                     b.Property<bool>("HasEncumbrances")
                         .HasColumnType("bit")
-                        .HasColumnName("has_encumbrances");
+                        .HasColumnName("HasEncumbrances");
 
                     b.Property<string>("Purpose")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("purpose");
+                        .HasColumnName("Purpose");
 
                     b.Property<int>("RoomCount")
                         .HasColumnType("int")
-                        .HasColumnName("room_count");
+                        .HasColumnName("RoomCount");
 
                     b.Property<decimal>("TotalArea")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)")
-                        .HasColumnName("total_area");
+                        .HasColumnName("TotalArea");
 
                     b.Property<int>("TotalFloors")
                         .HasColumnType("int")
-                        .HasColumnName("total_floors");
+                        .HasColumnName("TotalFloors");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("type");
+                        .HasColumnName("Type");
 
                     b.HasKey("Id");
 
-                    b.ToTable("properties");
+                    b.ToTable("Properties");
                 });
 
             modelBuilder.Entity("EstateAgency.Domain.Entitites.Application", b =>

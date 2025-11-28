@@ -28,13 +28,6 @@ public class ApplicationService(
     public override async Task<IEnumerable<ApplicationGetDto>> GetAllAsync()
     {
         var entities = await repository.GetAllAsync();
-
-        foreach (var entity in entities)
-        {
-            entity.Counterparty = await counterpartyRepo.GetByIdAsync(entity.CounterpartyId);
-            entity.Property = await propertyRepo.GetByIdAsync(entity.PropertyId);
-        }
-
         return mapper.Map<IEnumerable<ApplicationGetDto>>(entities);
     }
 
@@ -48,9 +41,6 @@ public class ApplicationService(
         var entity = await repository.GetByIdAsync(id);
         if (entity == null)
             return null;
-
-        entity.Counterparty = await counterpartyRepo.GetByIdAsync(entity.CounterpartyId);
-        entity.Property = await propertyRepo.GetByIdAsync(entity.PropertyId);
 
         return mapper.Map<ApplicationGetDto>(entity);
     }
@@ -80,8 +70,6 @@ public class ApplicationService(
         entity.Type = parsedType;
 
         var created = await repository.AddAsync(entity);
-        created.Counterparty = await counterpartyRepo.GetByIdAsync(dto.CounterpartyId);
-        created.Property = await propertyRepo.GetByIdAsync(dto.PropertyId);
 
         return mapper.Map<ApplicationGetDto>(created);
     }
@@ -110,10 +98,9 @@ public class ApplicationService(
 
         var entity = mapper.Map<Domain.Entitites.Application>(dto);
         entity.Type = parsedType;
+        entity.Id = id;
 
         var updated = await repository.UpdateAsync(entity);
-        updated.Counterparty = await counterpartyRepo.GetByIdAsync(dto.CounterpartyId);
-        updated.Property = await propertyRepo.GetByIdAsync(dto.PropertyId);
 
         return mapper.Map<ApplicationGetDto>(updated);
     }

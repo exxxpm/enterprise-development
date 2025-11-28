@@ -6,6 +6,7 @@ using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Application.Services;
 using EstateAgency.Domain;
 using EstateAgency.Domain.Data;
+using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
 using EstateAgency.Infrastructrure.EfCore.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -41,12 +42,13 @@ builder.AddSqlServerDbContext<EstateAgencyDbContext>("DefaultConnection");
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IRepository<Application>, ApplicationRepository>();
 
 builder.Services.AddScoped<ICrudService<ApplicationGetDto, ApplicationCreateEditDto>, ApplicationService>();
 builder.Services.AddScoped<ICrudService<PropertyGetDto, PropertyCreateEditDto>, PropertyService>();
 builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEditDto>, CounterpartyService>();
 
-builder.Services.AddScoped<AnalyticService>();
+builder.Services.AddScoped<IAnalyticService, AnalyticService>();
 
 var app = builder.Build();
 

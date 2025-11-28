@@ -26,11 +26,11 @@ public class PropertiesController(ICrudService<PropertyGetDto, PropertyCreateEdi
         try
         {
             var created = await service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return CreatedAtAction(nameof(GetById), new { created.Id }, created);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);
         }
     }
 
@@ -52,11 +52,11 @@ public class PropertiesController(ICrudService<PropertyGetDto, PropertyCreateEdi
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { ex.Message });
+            return NotFound(ex.Message);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);
         }
     }
 }

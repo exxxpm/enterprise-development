@@ -20,8 +20,6 @@ public class EstateAgencyMappingProfile : Profile
         CreateMap<Property, PropertyCreateEditDto>().ReverseMap();
 
         CreateMap<Domain.Entitites.Application, ApplicationGetDto>()
-            .ForMember(dest => dest.Counterparty, opt => opt.MapFrom(src => src.Counterparty))
-            .ForMember(dest => dest.Property, opt => opt.MapFrom(src => src.Property))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()));
         CreateMap<Domain.Entitites.Application, ApplicationCreateEditDto>().ReverseMap();
     }

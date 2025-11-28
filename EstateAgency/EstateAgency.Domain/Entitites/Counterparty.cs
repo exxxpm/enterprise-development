@@ -13,28 +13,28 @@ public class Counterparty
     /// Unique identifier of the counterparty.
     /// </summary>
     [Key]
-    [Column("id")]
+    [Column("Id")]
     public required int Id { get; set; }
 
     /// <summary>
     /// Full name of the counterparty.
     /// </summary>
     [MaxLength(100)]
-    [Column("full_name")]
+    [Column("FullName")]
     public required string FullName { get; set; }
 
     /// <summary>
     /// Passport number of the counterparty.
     /// </summary>
     [MaxLength(20)]
-    [Column("passport_number")]
+    [Column("PassportNumber")]
     public required string PassportNumber { get; set; }
 
     /// <summary>
     /// Phone number of the counterparty.
     /// </summary>
     [Phone]
-    [Column("phone_number")]
+    [Column("PhoneNumber")]
     public required string PhoneNumber { get; set; }
 
     /// <summary>

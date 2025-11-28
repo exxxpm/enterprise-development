@@ -26,21 +26,15 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
         try
         {
             var created = await service.CreateAsync(dto);
-
-            var idProp = typeof(ApplicationGetDto).GetProperty("Id") ?? 
-                throw new InvalidOperationException("DTO does not have Id property");
-
-            var id = (int)idProp.GetValue(created)!;
-
-            return CreatedAtAction(nameof(GetById), new { id }, created);
+            return CreatedAtAction(nameof(GetById), new { created.Id }, created);
         }
         catch (KeyNotFoundException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);      
         }
     }
 
@@ -62,11 +56,11 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
         }
         catch (KeyNotFoundException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { ex.Message });
+            return BadRequest(ex.Message);
         }
     }
 }
