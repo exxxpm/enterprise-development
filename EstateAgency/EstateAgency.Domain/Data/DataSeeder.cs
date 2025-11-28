@@ -1,6 +1,5 @@
 ﻿using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain.Enums;
-using System.Collections.Generic;
 
 namespace EstateAgency.Domain.Data;
 

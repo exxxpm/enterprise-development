@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EstateAgency.Application.Contracts.Property;
-using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain;
+using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain.Enums;
 
 namespace EstateAgency.Application.Services;

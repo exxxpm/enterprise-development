@@ -6,7 +6,6 @@ using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Application.Services;
 using EstateAgency.Domain;
 using EstateAgency.Domain.Data;
-using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
 using EstateAgency.Infrastructrure.EfCore.Repositories;
 using Microsoft.EntityFrameworkCore;

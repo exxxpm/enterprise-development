@@ -1,5 +1,6 @@
 ﻿using EstateAgency.Domain.Data;
 using EstateAgency.Domain.Enums;
+using System.Diagnostics.Metrics;
 
 namespace EstateAgency.Domain.Tests;
 
@@ -14,7 +15,7 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
     [Fact]
     public void GetSellersByPeriod()
     {
-        var expectedCount = 2;
+        const int expectedCount = 2;
 
         var startDate = new DateOnly(2025, 7, 1);
         var endDate = new DateOnly(2025, 12, 31);
@@ -23,7 +24,12 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
             .Where(a => a.Type == ApplicationType.Sale &&
                 a.CreatedAt >= startDate &&
                 a.CreatedAt <= endDate)
-            .Select(a => data.Counterparties.First(c => c.Id == a.CounterpartyId))
+            .Join(
+                data.Counterparties,
+                a => a.CounterpartyId,
+                c => c.Id,
+                (a, c) => c
+            )
             .Distinct()
             .ToList();
 
@@ -36,26 +42,29 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
     [Fact]
     public void Top5ClientsByApplicationCount()
     {
-        var topCount = 5;
+        const int topCount = 5;
 
-        var top5Purchase = data.Applications
+        var expectedTopPurchaseIds = new List<int> { 1, 3, 4, 6, 8 };
+        var expectedTopSaleIds = new List<int> { 2, 5, 7, 9 };
+
+        var actualTopPurchaseIds = data.Applications
             .Where(a => a.Type == ApplicationType.Purchase)
             .GroupBy(a => a.CounterpartyId)
             .OrderByDescending(g => g.Count())
             .Take(topCount)
-            .Select(g => data.Counterparties.First(c => c.Id == g.Key))
+            .Select(g => g.Key) 
             .ToList();
 
-        var top5Sale = data.Applications
+        var actualTopSaleIds = data.Applications
             .Where(a => a.Type == ApplicationType.Sale)
             .GroupBy(a => a.CounterpartyId)
             .OrderByDescending(g => g.Count())
             .Take(topCount)
-            .Select(g => data.Counterparties.First(c => c.Id == g.Key))
+            .Select(g => g.Key)
             .ToList();
 
-        Assert.NotEmpty(top5Purchase);
-        Assert.NotEmpty(top5Sale);
+        Assert.Equal(expectedTopPurchaseIds, actualTopPurchaseIds);
+        Assert.Equal(expectedTopSaleIds, actualTopSaleIds);
     }
 
     /// <summary>
@@ -75,17 +84,20 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
         };
 
         var counts = data.Applications
-            .GroupBy(a => data.Properties.First(p => p.Id == a.PropertyId).Type)
+            .Join(
+                data.Properties,
+                a => a.PropertyId,
+                p => p.Id,
+                (a, p) => new { Application = a, Property = p }
+            )
+            .GroupBy(x => x.Property.Type)
             .ToDictionary(
                 g => g.Key,
                 g => g.Count()
             );
 
         Assert.NotEmpty(counts);
-        foreach (var pair in expectedCounts)
-        {
-            Assert.Equal(pair.Value, counts[pair.Key]);
-        }
+        Assert.Equal(expectedCounts, counts);
     }
 
     /// <summary>
@@ -94,20 +106,18 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
     [Fact]
     public void ClientsWithMinimumApplicationCost()
     {
-        var expectedMinCost = 50000;
-        var expectedClientsIds = new List<int> { 1 };
+        const int expectedMinCost = 50000;
+        const int expectedClientId = 1;
 
-        var actualClients = data.Applications
-            .Where(a => a.TotalCost == expectedMinCost)
-            .Select(a => data.Counterparties.First(c => c.Id == a.CounterpartyId))
+        var actualMinCost = data.Applications.Min(a => a.TotalCost);
+        var actualClientId = data.Applications
+            .Where(a => a.TotalCost == actualMinCost)
+            .Select(a => a.CounterpartyId)
             .Distinct()
-            .ToList();
+            .Single();
 
-        Assert.Equal(expectedClientsIds.Count, actualClients.Count);
-        foreach (var client in actualClients)
-        {
-            Assert.Contains(client.Id, expectedClientsIds);
-        }
+        Assert.Equal(expectedMinCost, actualMinCost);
+        Assert.Equal(expectedClientId, actualClientId);
     }
 
     /// <summary>
@@ -116,20 +126,22 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
     [Fact]
     public void ClientsByPropertyType()
     {
-        var targetType = PropertyType.Apartment;
+        const PropertyType targetType = PropertyType.Apartment;
         var expectedClientIds = new List<int> { 1, 6 };
 
-        var actualClients = data.Applications
-            .Where(a => data.Properties.First(p => p.Id == a.PropertyId).Type == targetType)
-            .Select(a => data.Counterparties.First(c => c.Id == a.CounterpartyId))
+        var actualClientIds = data.Applications
+            .Join(
+                data.Properties,
+                a => a.PropertyId,
+                p => p.Id,
+                (a, p) => new { a.CounterpartyId, PropertyType = p.Type }
+            )
+            .Where(x => x.PropertyType == targetType)
+            .Select(x => x.CounterpartyId)
             .Distinct()
-            .OrderBy(c => c.FullName)
+            .OrderBy(id => id)
             .ToList();
 
-        Assert.Equal(expectedClientIds.Count, actualClients.Count);
-        foreach (var client in actualClients)
-        {
-            Assert.Contains(client.Id, expectedClientIds);
-        }
+        Assert.Equal(expectedClientIds, actualClientIds);
     }
 }
