@@ -11,12 +11,17 @@ namespace EstateAgency.Infrastructrure.EfCore.Repositories;
 public class ApplicationRepository(EstateAgencyDbContext context) : Repository<Application>(context)
 {
     /// <summary>
+    /// Database context for accessing the Estate Agency database.
+    /// </summary>
+    private readonly EstateAgencyDbContext _context = context;
+
+    /// <summary>
     /// Retrieves all Application entities /> from the database.
     /// </summary>
     /// <returns>A collection of all entities.</returns>
     public override async Task<IEnumerable<Application>> GetAllAsync()
     {
-        return await context.Set<Application>()
+        return await _context.Set<Application>()
             .Include(a => a.Counterparty)
             .Include(a => a.Property)
             .ToListAsync();
@@ -29,7 +34,7 @@ public class ApplicationRepository(EstateAgencyDbContext context) : Repository<A
     /// <returns>The entity if found; otherwise, null.</returns>
     public override async Task<Application?> GetByIdAsync(int id)
     {
-        return await context.Set<Application>()
+        return await _context.Set<Application>()
             .Include(a => a.Counterparty)
             .Include(a => a.Property)
             .FirstOrDefaultAsync(a => a.Id == id);

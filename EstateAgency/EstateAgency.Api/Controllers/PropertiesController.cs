@@ -14,6 +14,11 @@ public class PropertiesController(ICrudService<PropertyGetDto, PropertyCreateEdi
     : CrudControllerBase<PropertyGetDto, PropertyCreateEditDto>(service)
 {
     /// <summary>
+    /// CRUD service for Property entities used by the controller.
+    /// </summary>
+    private readonly ICrudService<PropertyGetDto, PropertyCreateEditDto> _service = service;
+
+    /// <summary>
     /// Creates a new property with validation.
     /// </summary>
     /// <param name="dto">The DTO containing property data.</param>
@@ -25,7 +30,7 @@ public class PropertiesController(ICrudService<PropertyGetDto, PropertyCreateEdi
     {
         try
         {
-            var created = await service.CreateAsync(dto);
+            var created = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { created.Id }, created);
         }
         catch (ArgumentException ex)
@@ -47,7 +52,7 @@ public class PropertiesController(ICrudService<PropertyGetDto, PropertyCreateEdi
     {
         try
         {
-            var updated = await service.UpdateAsync(id, dto);
+            var updated = await _service.UpdateAsync(id, dto);
             return Ok(updated);
         }
         catch (KeyNotFoundException ex)

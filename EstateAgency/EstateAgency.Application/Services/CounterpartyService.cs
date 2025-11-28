@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using EstateAgency.Domain.Entitites;
-using EstateAgency.Domain;
 using EstateAgency.Application.Contracts.Counterparty;
+using EstateAgency.Domain;
+using EstateAgency.Domain.Entitites;
 
 namespace EstateAgency.Application.Services;
 

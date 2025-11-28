@@ -14,6 +14,11 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
     : CrudControllerBase<ApplicationGetDto, ApplicationCreateEditDto>(service)
 {
     /// <summary>
+    /// CRUD service for Applivation entities used by the controller.
+    /// </summary>
+    private readonly ICrudService<ApplicationGetDto, ApplicationCreateEditDto> _service = service;
+
+    /// <summary>
     /// Creates a new application with validation and custom error handling.
     /// </summary>
     /// <param name="dto">The DTO containing application data.</param>
@@ -25,7 +30,7 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
     {
         try
         {
-            var created = await service.CreateAsync(dto);
+            var created = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { created.Id }, created);
         }
         catch (KeyNotFoundException ex)
@@ -51,7 +56,7 @@ public class ApplicationsController(ICrudService<ApplicationGetDto, ApplicationC
     {
         try
         {
-            var updated = await service.UpdateAsync(id, dto);
+            var updated = await _service.UpdateAsync(id, dto);
             return Ok(updated);
         }
         catch (KeyNotFoundException ex)

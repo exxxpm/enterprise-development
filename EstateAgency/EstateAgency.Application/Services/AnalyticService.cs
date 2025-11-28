@@ -3,7 +3,6 @@ using EstateAgency.Application.Contracts.Counterparty;
 using EstateAgency.Application.Contracts.Interfaces;
 using EstateAgency.Application.Contracts.Property;
 using EstateAgency.Domain;
-using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain.Enums;
 
 namespace EstateAgency.Application.Services;
@@ -12,13 +11,9 @@ namespace EstateAgency.Application.Services;
 /// Service providing analytics on applications, counterparties, and properties.
 /// </summary>
 /// <param name="applicationRepo">Repository for accessing application data.</param>
-/// <param name="counterpartyRepo">Repository for accessing counterparty data.</param>
-/// <param name="propertyRepo">Repository for accessing property data.</param>
 /// <param name="mapper">AutoMapper instance for mapping entities to DTOs.</param>
 public class AnalyticService(
     IRepository<Domain.Entitites.Application> applicationRepo,
-    IRepository<Counterparty> counterpartyRepo,
-    IRepository<Property> propertyRepo,
     IMapper mapper) : IAnalyticService
 {
     /// <summary>
@@ -30,7 +25,6 @@ public class AnalyticService(
     public async Task<List<CounterpartyGetDto>> CouterpatriesByPeriodAsync(DateOnly startDate, DateOnly endDate)
     {
         var applications = await applicationRepo.GetAllAsync();
-        var counterparties = await counterpartyRepo.GetAllAsync();
 
         var sellers = applications
             .Where(a => a.Type == ApplicationType.Sale &&
@@ -50,7 +44,6 @@ public class AnalyticService(
     public async Task<TopCounterpartiesDto> TopCounterpartiesAsync()
     {
         var applications = await applicationRepo.GetAllAsync();
-        var counterparties = await counterpartyRepo.GetAllAsync();
         var topCount = 5;
 
         var topPurchase = applications
@@ -85,7 +78,6 @@ public class AnalyticService(
     public async Task<List<PropertyTypeCountDto>> PropertyTypeCountAsync()
     {
         var applications = await applicationRepo.GetAllAsync();
-        var properties = await propertyRepo.GetAllAsync();
 
         var counts = applications
             .GroupBy(a => a.Property!.Type)
@@ -105,7 +97,6 @@ public class AnalyticService(
     public async Task<List<ClientWithMinRequestDto>> MinPriceCounterpartiesAsync()
     {
         var applications = await applicationRepo.GetAllAsync();
-        var counterparties = await counterpartyRepo.GetAllAsync();
 
         var minCost = applications.Min(a => a.TotalCost);
 
@@ -130,8 +121,6 @@ public class AnalyticService(
     public async Task<List<CounterpartyGetDto>> PropertyTypeCountAsync(PropertyType propertyType)
     {
         var applications = await applicationRepo.GetAllAsync();
-        var counterparties = await counterpartyRepo.GetAllAsync();
-        var properties = await propertyRepo.GetAllAsync();
 
         var clients = applications
             .Where(a => a.Property!.Type == propertyType)

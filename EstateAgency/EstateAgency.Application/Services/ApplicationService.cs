@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using EstateAgency.Application.Contracts.Application;
 using EstateAgency.Domain;
-using EstateAgency.Domain.Entitites;
 using EstateAgency.Domain.Enums;
 
 namespace EstateAgency.Application.Services;
@@ -11,24 +10,30 @@ namespace EstateAgency.Application.Services;
 /// and ensuring related counterparty and property entities exist and are loaded.
 /// </summary>
 /// <param name="repository">The repository used for application CRUD operations.</param>
-/// <param name="counterpartyRepo">The repository used for accessing counterparties.</param>
-/// <param name="propertyRepo">The repository used for accessing properties.</param>
 /// <param name="mapper">The AutoMapper instance used for mapping between entities and DTOs.</param>
 public class ApplicationService(
     IRepository<Domain.Entitites.Application> repository,
-    IRepository<Counterparty> counterpartyRepo,
-    IRepository<Property> propertyRepo,
     IMapper mapper
 ) : CrudService<Domain.Entitites.Application, ApplicationGetDto, ApplicationCreateEditDto>(repository, mapper)
 {
+    /// <summary>
+    /// Repository for accessing Application entities.
+    /// </summary>
+    private readonly IRepository<Domain.Entitites.Application> _repository = repository;
+
+    /// <summary>
+    /// AutoMapper instance for mapping between entities and DTOs.
+    /// </summary>
+    private readonly IMapper _mapper = mapper;
+
     /// <summary>
     /// Retrieves all applications, including their related counterparty and property data.
     /// </summary>
     /// <returns>A collection of ApplicationGetDto objects with related entities populated.</returns>
     public override async Task<IEnumerable<ApplicationGetDto>> GetAllAsync()
     {
-        var entities = await repository.GetAllAsync();
-        return mapper.Map<IEnumerable<ApplicationGetDto>>(entities);
+        var entities = await _repository.GetAllAsync();
+        return _mapper.Map<IEnumerable<ApplicationGetDto>>(entities);
     }
 
     /// <summary>
@@ -38,11 +43,11 @@ public class ApplicationService(
     /// <returns>The ApplicationGetDto with related entities populated, or null if not found.</returns>
     public override async Task<ApplicationGetDto?> GetByIdAsync(int id)
     {
-        var entity = await repository.GetByIdAsync(id);
+        var entity = await _repository.GetByIdAsync(id);
         if (entity == null)
             return null;
 
-        return mapper.Map<ApplicationGetDto>(entity);
+        return _mapper.Map<ApplicationGetDto>(entity);
     }
 
     /// <summary>
@@ -51,7 +56,6 @@ public class ApplicationService(
     /// <param name="dto">The DTO containing application data.</param>
     /// <returns>The created ApplicationGetDto with related entities populated.</returns>
     /// <exception cref="ArgumentException">Thrown if Type is invalid.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown if the related Counterparty or Property does not exist.</exception>
     public override async Task<ApplicationGetDto> CreateAsync(ApplicationCreateEditDto dto)
     {
         if (!Enum.TryParse<ApplicationType>(dto.Type, true, out var parsedType))
@@ -60,18 +64,12 @@ public class ApplicationService(
             throw new ArgumentException($"Invalid ApplicationType '{dto.Type}'. Allowed values: {allowedTypes}");
         }
 
-        if (!await counterpartyRepo.ExistsAsync(dto.CounterpartyId))
-            throw new KeyNotFoundException($"Counterparty with Id {dto.CounterpartyId} does not exist.");
-
-        if (!await propertyRepo.ExistsAsync(dto.PropertyId))
-            throw new KeyNotFoundException($"Property with Id {dto.PropertyId} does not exist.");
-
-        var entity = mapper.Map<Domain.Entitites.Application>(dto);
+        var entity = _mapper.Map<Domain.Entitites.Application>(dto);
         entity.Type = parsedType;
 
-        var created = await repository.AddAsync(entity);
+        var created = await _repository.AddAsync(entity);
 
-        return mapper.Map<ApplicationGetDto>(created);
+        return _mapper.Map<ApplicationGetDto>(created);
     }
 
     /// <summary>
@@ -81,7 +79,6 @@ public class ApplicationService(
     /// <param name="dto">The DTO containing updated application data.</param>
     /// <returns>The updated ApplicationGetDto with related entities populated.</returns>
     /// <exception cref="ArgumentException">Thrown if Type is invalid.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown if the related Counterparty or Property does not exist.</exception>
     public override async Task<ApplicationGetDto> UpdateAsync(int id, ApplicationCreateEditDto dto)
     {
         if (!Enum.TryParse<ApplicationType>(dto.Type, true, out var parsedType))
@@ -90,18 +87,12 @@ public class ApplicationService(
             throw new ArgumentException($"Invalid ApplicationType '{dto.Type}'. Allowed values: {allowedTypes}");
         }
 
-        if (!await counterpartyRepo.ExistsAsync(dto.CounterpartyId))
-            throw new KeyNotFoundException($"Counterparty with Id {dto.CounterpartyId} does not exist.");
-
-        if (!await propertyRepo.ExistsAsync(dto.PropertyId))
-            throw new KeyNotFoundException($"Property with Id {dto.PropertyId} does not exist.");
-
-        var entity = mapper.Map<Domain.Entitites.Application>(dto);
+        var entity = _mapper.Map<Domain.Entitites.Application>(dto);
         entity.Type = parsedType;
         entity.Id = id;
 
-        var updated = await repository.UpdateAsync(entity);
+        var updated = await _repository.UpdateAsync(entity);
 
-        return mapper.Map<ApplicationGetDto>(updated);
+        return _mapper.Map<ApplicationGetDto>(updated);
     }
 }
