@@ -44,9 +44,6 @@ public class ApplicationService(
     public override async Task<ApplicationGetDto?> GetByIdAsync(int id)
     {
         var entity = await _repository.GetByIdAsync(id);
-        if (entity == null)
-            return null;
-
         return _mapper.Map<ApplicationGetDto>(entity);
     }
 

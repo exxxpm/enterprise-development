@@ -33,8 +33,6 @@ public class CrudService<TEntity, TEntityGetDto, TEntityCreateEditDto>(
     public virtual async Task<TEntityGetDto?> GetByIdAsync(int id)
     {
         var entity = await repository.GetByIdAsync(id);
-        if (entity == null)
-            return default;
         return mapper.Map<TEntityGetDto>(entity);
     }
 

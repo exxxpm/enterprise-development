@@ -113,10 +113,11 @@ public class DomainTests(DataSeeder data) : IClassFixture<DataSeeder>
             .Where(a => a.TotalCost == actualMinCost)
             .Select(a => a.CounterpartyId)
             .Distinct()
-            .Single();
+            .ToList();
 
+        var singleClientId = Assert.Single(actualClientId);
         Assert.Equal(expectedMinCost, actualMinCost);
-        Assert.Equal(expectedClientId, actualClientId);
+        Assert.Equal(expectedClientId, singleClientId);
     }
 
     /// <summary>
