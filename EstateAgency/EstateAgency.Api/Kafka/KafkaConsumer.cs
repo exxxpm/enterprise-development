@@ -5,24 +5,25 @@ using System.Text.Json;
 
 namespace EstateAgency.Api.Kafka;
 
-public class KafkaConsumerWorker(
-    ILogger<KafkaConsumerWorker> logger,
+public class KafkaConsumer(
+    ILogger<KafkaConsumer> logger,
     IConsumer<Ignore, string> consumer,
-    ICrudService<ApplicationGetDto, ApplicationCreateEditDto> service,
-    IConfiguration configuration) : BackgroundService
+    IConfiguration configuration,
+    IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private readonly string _topic = configuration["KafkaTopic"] ?? "applications";
-    private readonly string _groupId = configuration["KafkaGroupId"] ?? "application-consumers";
-    private readonly bool _autoCommit = bool.TryParse(configuration["KafkaAutoCommit"], out var ac) ? ac : false;
-    private readonly int _consumeTimeoutMs = int.TryParse(configuration["KafkaConsumeTimeout"], out var ct) ? ct : 1000;
+    private readonly int _consumeTimeoutMs =  int.TryParse(configuration["KafkaConsumeTimeout"], out var ct) ? ct : 1000;
     private readonly int _maxRetries = int.TryParse(configuration["KafkaMaxRetries"], out var mr) ? mr : 3;
+    private readonly bool _autoCommit = bool.TryParse(configuration["KafkaAutoCommit"], out var ac) && ac;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         consumer.Subscribe(_topic);
 
-        logger.LogInformation("KafkaConsumerWorker started. Topic: {Topic}, GroupId: {Group}",
-            _topic, _groupId);
+        using var scope = scopeFactory.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ICrudService<ApplicationGetDto, ApplicationCreateEditDto>>();
+
+        logger.LogInformation("KafkaConsumerWorker started. GroupId: {Group}", _topic);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -38,10 +39,31 @@ public class KafkaConsumerWorker(
                     continue;
                 }
 
-                var dto = TryDeserialize<ApplicationCreateEditDto>(result.Message.Value, _maxRetries);
+                ApplicationCreateEditDto? dto = null;
+
+                for (var i = 1; i <= _maxRetries; i++)
+                {
+                    try
+                    {
+                        dto = JsonSerializer.Deserialize<ApplicationCreateEditDto>(result.Message.Value);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex,
+                            "Deserialize failed ({Attempt}/{Max}).",
+                            i, _maxRetries);
+
+                        if (i == _maxRetries)
+                            dto = null;
+                    }
+                }
+
                 if (dto == null)
                 {
-                    logger.LogError("Failed to deserialize message after retries: {Msg}", result.Message.Value);
+                    logger.LogError(
+                        "Failed to deserialize message after {Retries} retries. Msg: {Msg}",
+                        _maxRetries, result.Message.Value);
                     continue;
                 }
 
@@ -69,20 +91,5 @@ public class KafkaConsumerWorker(
         consumer.Close();
         logger.LogInformation("Kafka consumer stopped");
     }
-
-    private static T? TryDeserialize<T>(string json, int retryCount)
-    {
-        for (var i = 1; i <= retryCount; i++)
-        {
-            try
-            { return JsonSerializer.Deserialize<T>(json); }
-            catch
-            {
-                if (i == retryCount)
-                    return default;
-            }
-        }
-
-        return default;
-    }
 }
+

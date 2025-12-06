@@ -1,3 +1,5 @@
+using Confluent.Kafka;
+using EstateAgency.Api.Kafka;
 using EstateAgency.Application;
 using EstateAgency.Application.Contracts.Application;
 using EstateAgency.Application.Contracts.Counterparty;
@@ -38,6 +40,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.AddSqlServerDbContext<EstateAgencyDbContext>("DefaultConnection");
+var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ?? "localhost:9092";
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
 
@@ -49,6 +52,21 @@ builder.Services.AddScoped<ICrudService<PropertyGetDto, PropertyCreateEditDto>, 
 builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEditDto>, CounterpartyService>();
 
 builder.Services.AddScoped<IAnalyticService, AnalyticService>();
+
+builder.Services.AddHostedService<KafkaConsumer>();
+
+builder.Services.AddSingleton(sp =>
+{
+    var config = new ConsumerConfig
+    {
+        BootstrapServers = kafkaConnection,
+        GroupId = Environment.GetEnvironmentVariable("KafkaGroupId") ?? "default",
+        AutoOffsetReset = AutoOffsetReset.Earliest,
+        EnableAutoCommit = bool.Parse(Environment.GetEnvironmentVariable("KafkaAutocommit") ?? "false"),
+        FetchMinBytes = int.Parse(Environment.GetEnvironmentVariable("KafkaFetchMinBytes") ?? "1")
+    };
+    return new ConsumerBuilder<Ignore, string>(config).Build();
+});
 
 var app = builder.Build();
 

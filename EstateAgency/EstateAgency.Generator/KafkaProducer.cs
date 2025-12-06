@@ -3,23 +3,22 @@ using System.Text.Json;
 
 namespace EstateAgency.Generator;
 
-public class KafkaProducerWorker(
-    ILogger<KafkaProducerWorker> logger,
+public class KafkaProducer(
+    ILogger<KafkaProducer> logger,
     IProducer<Null, string> producer,
     IConfiguration configuration) : BackgroundService
 {
-    private readonly string _topic = configuration["KafkaProducerTopic"] ?? "applications";
+    private readonly string _topic = configuration["KafkaTopic"] ?? "applications";
     private readonly int _intervalMs = int.TryParse(configuration["KafkaProducerIntervalMs"], out var i) ? i : 1000;
     private readonly int _batchSize = int.TryParse(configuration["KafkaProducerBatchSize"], out var b) ? b : 1;
-    private readonly bool _logPayload = bool.TryParse(configuration["KafkaProducerLogPayload"], out var lp) ? lp : false;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation(
-            "KafkaProducerWorker started. Topic: {Topic}, BatchSize: {Batch}, IntervalMs: {Int}",
+            "KafkaProducer started. Topic: {Topic}, BatchSize: {Batch}, IntervalMs: {Int}",
             _topic, _batchSize, _intervalMs);
 
-        var faker = ApplicationFaker.Create();
+        var faker = Generator.Create();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -30,8 +29,7 @@ public class KafkaProducerWorker(
                     var dto = faker.Generate();
                     var json = JsonSerializer.Serialize(dto);
 
-                    if (_logPayload)
-                        logger.LogInformation("Producing message: {Msg}", json);
+                    logger.LogInformation("Producing message: {Msg}", json);
 
                     await producer.ProduceAsync(
                         _topic,
