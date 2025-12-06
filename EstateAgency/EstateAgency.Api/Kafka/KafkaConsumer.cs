@@ -5,91 +5,108 @@ using System.Text.Json;
 
 namespace EstateAgency.Api.Kafka;
 
+/// <summary>
+/// Background service that listens to a Kafka topic, consumes messages, deserializes them into DTOs,
+/// and persists them using a CRUD service.
+/// </summary>
+/// <param name="logger">Logger for logging information and errors.</param>
+/// <param name="kafkaConsumer">Kafka consumer instance to subscribe and consume messages.</param>
+/// <param name="scopeFactory">Service scope factory for resolving scoped services.</param>
+/// <param name="configuration">Application configuration containing Kafka settings.</param>
 public class KafkaConsumer(
     ILogger<KafkaConsumer> logger,
-    IConsumer<Ignore, string> consumer,
-    IConfiguration configuration,
-    IServiceScopeFactory scopeFactory) : BackgroundService
+    IConsumer<Ignore, string> kafkaConsumer,
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration) : BackgroundService
 {
-    private readonly string _topic = configuration["KafkaTopic"] ?? "applications";
-    private readonly int _consumeTimeoutMs =  int.TryParse(configuration["KafkaConsumeTimeout"], out var ct) ? ct : 1000;
-    private readonly int _maxRetries = int.TryParse(configuration["KafkaMaxRetries"], out var mr) ? mr : 3;
-    private readonly bool _autoCommit = bool.TryParse(configuration["KafkaAutoCommit"], out var ac) && ac;
+    /// <summary>
+    /// Name of the Kafka topic to subscribe to. Defaults to "applications" if not set in configuration.
+    /// </summary>
+    private readonly string _topicName = configuration["KafkaTopic"] ?? "applications";
 
+    /// <summary>
+    /// Timeout in milliseconds for consuming a Kafka message. Defaults to 1000 ms.
+    /// </summary>
+    private readonly int _consumeTimeout = int.TryParse(configuration["KafkaConsumeTimeout"], out var timeout) ? timeout : 1000;
+
+    /// <summary>
+    /// Maximum number of attempts to deserialize a Kafka message. Defaults to 5.
+    /// </summary>
+    private readonly int _maxDeserializeAttempts = int.TryParse(configuration["KafkaMaxRetries"], out var retries) ? retries : 5;
+
+    /// <summary>
+    /// Indicates whether to auto-commit Kafka messages. Defaults to false.
+    /// </summary>
+    private readonly bool _autoCommitEnabled = bool.TryParse(configuration["KafkaAutocommit"], out var ac) && ac;
+
+    /// <summary>
+    /// Executes the Kafka consumer service. Continuously listens to the configured topic,
+    /// deserializes incoming messages, and persists them using a CRUD service until the service is stopped.
+    /// </summary>
+    /// <param name="stoppingToken">Cancellation token triggered when the service is stopping.</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        consumer.Subscribe(_topic);
-
-        using var scope = scopeFactory.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<ICrudService<ApplicationGetDto, ApplicationCreateEditDto>>();
-
-        logger.LogInformation("KafkaConsumerWorker started. GroupId: {Group}", _topic);
-
-        while (!stoppingToken.IsCancellationRequested)
+        kafkaConsumer.Subscribe(_topicName);
+        logger.LogInformation("KafkaConsumer started on topic {Topic}", _topicName);
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var result = consumer.Consume(TimeSpan.FromMilliseconds(_consumeTimeoutMs));
-                if (result == null)
-                    continue;
-
-                if (string.IsNullOrWhiteSpace(result.Message?.Value))
+                try
                 {
-                    logger.LogWarning("Received empty Kafka message");
-                    continue;
-                }
-
-                ApplicationCreateEditDto? dto = null;
-
-                for (var i = 1; i <= _maxRetries; i++)
-                {
-                    try
+                    var message = kafkaConsumer.Consume(TimeSpan.FromMilliseconds(_consumeTimeout));
+                    if (message?.Message?.Value is not { Length: > 0 })
                     {
-                        dto = JsonSerializer.Deserialize<ApplicationCreateEditDto>(result.Message.Value);
-                        break;
+                        logger.LogWarning("Received an empty message from Kafka");
+                        continue;
                     }
-                    catch (Exception ex)
+
+                    ApplicationCreateEditDto? dto = null;
+                    for (var attempt = 1; attempt <= _maxDeserializeAttempts; attempt++)
                     {
-                        logger.LogWarning(ex,
-                            "Deserialize failed ({Attempt}/{Max}).",
-                            i, _maxRetries);
-
-                        if (i == _maxRetries)
-                            dto = null;
+                        try
+                        {
+                            dto = JsonSerializer.Deserialize<ApplicationCreateEditDto>(message.Message.Value);
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogWarning(ex, "Deserialization attempt {Attempt}/{MaxAttempts} failed", attempt, _maxDeserializeAttempts);
+                        }
                     }
-                }
 
-                if (dto == null)
+                    if (dto == null)
+                    {
+                        logger.LogError("Could not deserialize message after {MaxAttempts} attempts: {Msg}", _maxDeserializeAttempts, message.Message.Value);
+                        continue;
+                    }
+
+                    using var scope = scopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ICrudService<ApplicationGetDto, ApplicationCreateEditDto>>();
+                    var savedEntity = await service.CreateAsync(dto);
+
+                    logger.LogInformation("Application saved successfully: {@Entity}", savedEntity);
+
+                    if (!_autoCommitEnabled)
+                        kafkaConsumer.Commit(message);
+                }
+                catch (ConsumeException ex)
                 {
-                    logger.LogError(
-                        "Failed to deserialize message after {Retries} retries. Msg: {Msg}",
-                        _maxRetries, result.Message.Value);
-                    continue;
+                    logger.LogError(ex, "Error consuming Kafka message");
                 }
-
-                var created = await service.CreateAsync(dto);
-
-                logger.LogInformation("Saved Application: {@Entity}", created);
-
-                if (!_autoCommit)
-                    consumer.Commit(result);
-            }
-            catch (ConsumeException ex)
-            {
-                logger.LogError(ex, "Kafka consume error");
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Unexpected error in KafkaConsumerWorker");
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Unexpected error in AppKafkaListener");
+                }
             }
         }
-
-        consumer.Close();
-        logger.LogInformation("Kafka consumer stopped");
+        finally
+        {
+            logger.LogInformation("KafkaConsumer stopped");
+        }
     }
 }
-

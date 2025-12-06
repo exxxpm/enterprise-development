@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-builder.AddSqlServerDbContext<EstateAgencyDbContext>("DefaultConnection");
+builder.AddSqlServerDbContext<EstateAgencyDbContext>("DbDefaultConnection");
 var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ?? "localhost:9092";
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
