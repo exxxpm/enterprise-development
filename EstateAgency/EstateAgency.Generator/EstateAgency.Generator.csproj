@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-EstateAgency.Generator-418890a8-9a5c-41ef-a635-5705e80cec28</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Confluent.Kafka" Version="9.5.2" />
+    <PackageReference Include="Bogus" Version="35.6.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EstateAgency.Application.Contracts\EstateAgency.Application.Contracts.csproj" />
+    <ProjectReference Include="..\EstateAgency.ServiceDefaults\EstateAgency.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>
