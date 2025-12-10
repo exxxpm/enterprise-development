@@ -1,4 +1,6 @@
+using Aspire.Confluent.Kafka;
 using Confluent.Kafka;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace EstateAgency.Generator;
@@ -7,39 +9,30 @@ namespace EstateAgency.Generator;
 /// Background service that produces messages to a Kafka topic at a configurable interval and batch size.
 /// Messages are generated using <see cref="Generator"/> and serialized to JSON.
 /// </summary>
+/// <param name="logger">Logger for logging information and errors.</param>
+/// <param name="producer">Kafka producer instance to produce messages.</param>
+/// <param name="options">Application settings containing Kafka settings.</param>
 public class KafkaProducer(
     ILogger<KafkaProducer> logger,
     IProducer<Null, string> producer,
-    IConfiguration configuration) : BackgroundService
+    IOptions<KafkaSettings> options) : BackgroundService
 {
     /// <summary>
-    /// Kafka topic to which messages will be produced. Defaults to "applications".
+    /// Kafka producer settings from IOptions.
     /// </summary>
-    private readonly string _topic = configuration["KafkaTopic"] ?? "applications";
+    private readonly KafkaSettings _settings = options.Value;
 
     /// <summary>
-    /// Interval in milliseconds between producing batches of messages. Defaults to 1000 ms.
+    /// Main execution loop. Produces messages continuously until cancellation.
     /// </summary>
-    private readonly int _intervalMs = int.TryParse(configuration["KafkaProducerIntervalMs"], out var i) ? i : 1000;
-
-    /// <summary>
-    /// Number of messages to produce per batch. Defaults to 1.
-    /// </summary>
-    private readonly int _batchSize = int.TryParse(configuration["KafkaProducerBatchSize"], out var b) ? b : 1;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="KafkaProducer"/> class.
-    /// </summary>
-    /// <param name="logger">Logger for logging information and errors.</param>
-    /// <param name="producer">Kafka producer instance for sending messages.</param>
-    /// <param name="configuration">Application configuration containing Kafka settings.</param>
+    /// <param name="stoppingToken">Cancellation token.</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation(
-            "KafkaProducer started. Topic: {Topic}, BatchSize: {Batch}, IntervalMs: {Int}",
-            _topic, 
-            _batchSize, 
-            _intervalMs);
+            "KafkaProducer started. Topic: {Topic}, BatchSize: {Batch}, IntervalMs: {Interval}",
+            _settings.Topic,
+            _settings.BatchSize,
+            _settings.ProduceIntervalMs);
 
         var faker = Generator.Create();
 
@@ -47,7 +40,7 @@ public class KafkaProducer(
         {
             try
             {
-                for (var i = 0; i < _batchSize; i++)
+                for (var i = 0; i < _settings.BatchSize; i++)
                 {
                     var dto = faker.Generate();
                     var json = JsonSerializer.Serialize(dto);
@@ -55,12 +48,12 @@ public class KafkaProducer(
                     logger.LogInformation("Producing message: {Msg}", json);
 
                     await producer.ProduceAsync(
-                        _topic,
+                        _settings.Topic,
                         new Message<Null, string> { Value = json },
                         stoppingToken);
                 }
 
-                await Task.Delay(_intervalMs, stoppingToken);
+                await Task.Delay(_settings.ProduceIntervalMs, stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -71,6 +64,7 @@ public class KafkaProducer(
                 logger.LogError(ex, "Kafka producer error");
             }
         }
-        logger.LogInformation("Kafka producer stopped");
+
+        logger.LogInformation("KafkaProducer stopped");
     }
 }

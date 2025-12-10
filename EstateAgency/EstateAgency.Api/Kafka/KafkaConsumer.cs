@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using EstateAgency.Application.Contracts.Application;
 using EstateAgency.Application.Contracts.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace EstateAgency.Api.Kafka;
@@ -10,51 +11,36 @@ namespace EstateAgency.Api.Kafka;
 /// and persists them using a CRUD service.
 /// </summary>
 /// <param name="logger">Logger for logging information and errors.</param>
-/// <param name="kafkaConsumer">Kafka consumer instance to subscribe and consume messages.</param>
+/// <param name="consumer">Kafka consumer instance to subscribe and consume messages.</param>
 /// <param name="scopeFactory">Service scope factory for resolving scoped services.</param>
-/// <param name="configuration">Application configuration containing Kafka settings.</param>
+/// <param name="options">Application settings containing Kafka settings.</param>
 public class KafkaConsumer(
     ILogger<KafkaConsumer> logger,
-    IConsumer<Ignore, string> kafkaConsumer,
+    IConsumer<Ignore, string> consumer,
     IServiceScopeFactory scopeFactory,
-    IConfiguration configuration) : BackgroundService
+    IOptions<KafkaSettings> options) : BackgroundService
 {
     /// <summary>
-    /// Name of the Kafka topic to subscribe to. Defaults to "applications" if not set in configuration.
+    /// Kafka consumer settings from IOptions.
     /// </summary>
-    private readonly string _topicName = configuration["KafkaTopic"] ?? "applications";
+    private readonly KafkaSettings _settings = options.Value;
 
     /// <summary>
-    /// Timeout in milliseconds for consuming a Kafka message. Defaults to 1000 ms.
+    /// Main execution loop. Consumes messages, deserializes, and saves them until cancellation.
     /// </summary>
-    private readonly int _consumeTimeout = int.TryParse(configuration["KafkaConsumeTimeout"], out var timeout) ? timeout : 1000;
-
-    /// <summary>
-    /// Maximum number of attempts to deserialize a Kafka message. Defaults to 5.
-    /// </summary>
-    private readonly int _maxDeserializeAttempts = int.TryParse(configuration["KafkaMaxRetries"], out var retries) ? retries : 5;
-
-    /// <summary>
-    /// Indicates whether to auto-commit Kafka messages. Defaults to false.
-    /// </summary>
-    private readonly bool _autoCommitEnabled = bool.TryParse(configuration["KafkaAutocommit"], out var ac) && ac;
-
-    /// <summary>
-    /// Executes the Kafka consumer service. Continuously listens to the configured topic,
-    /// deserializes incoming messages, and persists them using a CRUD service until the service is stopped.
-    /// </summary>
-    /// <param name="stoppingToken">Cancellation token triggered when the service is stopping.</param>
+    /// <param name="stoppingToken">Cancellation token.</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        kafkaConsumer.Subscribe(_topicName);
-        logger.LogInformation("KafkaConsumer started on topic {Topic}", _topicName);
+        consumer.Subscribe(_settings.Topic);
+        logger.LogInformation("KafkaConsumer started on topic {Topic}", _settings.Topic);
+
         try
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    var message = kafkaConsumer.Consume(TimeSpan.FromMilliseconds(_consumeTimeout));
+                    var message = consumer.Consume(TimeSpan.FromMilliseconds(_settings.ConsumeTimeoutMs));
                     if (message?.Message?.Value is not { Length: > 0 })
                     {
                         logger.LogWarning("Received an empty message from Kafka");
@@ -62,7 +48,7 @@ public class KafkaConsumer(
                     }
 
                     ApplicationCreateEditDto? dto = null;
-                    for (var attempt = 1; attempt <= _maxDeserializeAttempts; attempt++)
+                    for (var attempt = 1; attempt <= _settings.MaxDeserializeAttempts; attempt++)
                     {
                         try
                         {
@@ -71,13 +57,13 @@ public class KafkaConsumer(
                         }
                         catch (Exception ex)
                         {
-                            logger.LogWarning(ex, "Deserialization attempt {Attempt}/{MaxAttempts} failed", attempt, _maxDeserializeAttempts);
+                            logger.LogWarning(ex, "Deserialization attempt {Attempt}/{MaxAttempts} failed", attempt, _settings.MaxDeserializeAttempts);
                         }
                     }
 
                     if (dto == null)
                     {
-                        logger.LogError("Could not deserialize message after {MaxAttempts} attempts: {Msg}", _maxDeserializeAttempts, message.Message.Value);
+                        logger.LogError("Could not deserialize message after {MaxAttempts} attempts: {Msg}", _settings.MaxDeserializeAttempts, message.Message.Value);
                         continue;
                     }
 
@@ -87,8 +73,8 @@ public class KafkaConsumer(
 
                     logger.LogInformation("Application saved successfully: {@Entity}", savedEntity);
 
-                    if (!_autoCommitEnabled)
-                        kafkaConsumer.Commit(message);
+                    if (!_settings.AutoCommitEnabled)
+                        consumer.Commit(message);
                 }
                 catch (ConsumeException ex)
                 {
@@ -100,7 +86,7 @@ public class KafkaConsumer(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Unexpected error in AppKafkaListener");
+                    logger.LogError(ex, "Unexpected error in KafkaConsumer");
                 }
             }
         }

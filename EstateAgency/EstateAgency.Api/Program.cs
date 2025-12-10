@@ -12,6 +12,7 @@ using EstateAgency.Domain.Entitites;
 using EstateAgency.Infrastructrure.EfCore.Persistence;
 using EstateAgency.Infrastructrure.EfCore.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +41,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.AddSqlServerDbContext<EstateAgencyDbContext>("DbDefaultConnection");
-var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ?? "localhost:9092";
+var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ?? 
+    throw new InvalidOperationException("KafkaDefaultConnection is not set");
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
 
@@ -53,19 +55,28 @@ builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEd
 
 builder.Services.AddScoped<IAnalyticService, AnalyticService>();
 
+builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+
 builder.Services.AddHostedService<KafkaConsumer>();
 
 builder.Services.AddSingleton(sp =>
 {
-    var config = new ConsumerConfig
+    var config = sp.GetRequiredService<IConfiguration>();
+    var settings = sp.GetRequiredService<IOptions<KafkaSettings>>().Value;
+
+    settings.BootstrapServers = config.GetConnectionString("KafkaDefaultConnection")
+        ?? throw new InvalidOperationException("KafkaDefaultConnection is not set");
+
+    var consumerConfig = new ConsumerConfig
     {
-        BootstrapServers = kafkaConnection,
-        GroupId = Environment.GetEnvironmentVariable("KafkaGroupId") ?? "default",
-        AutoOffsetReset = AutoOffsetReset.Earliest,
-        EnableAutoCommit = bool.Parse(Environment.GetEnvironmentVariable("KafkaAutocommit") ?? "false"),
-        FetchMinBytes = int.Parse(Environment.GetEnvironmentVariable("KafkaFetchMinBytes") ?? "1")
+        BootstrapServers = settings.BootstrapServers,
+        GroupId = settings.GroupId,
+        EnableAutoCommit = settings.AutoCommitEnabled,
+        FetchMinBytes = settings.FetchMinBytes,
+        AutoOffsetReset = Enum.Parse<AutoOffsetReset>(settings.AutoOffsetReset, ignoreCase: true)
     };
-    return new ConsumerBuilder<Ignore, string>(config).Build();
+
+    return new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
 });
 
 var app = builder.Build();
