@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.AddSqlServerDbContext<EstateAgencyDbContext>("DbDefaultConnection");
-var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ?? 
+var kafkaConnection = builder.Configuration["ConnectionStrings:KafkaDefaultConnection"] ??
     throw new InvalidOperationException("KafkaDefaultConnection is not set");
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<EstateAgencyMappingProfile>());
@@ -55,21 +55,18 @@ builder.Services.AddScoped<ICrudService<CounterpartyGetDto, CounterpartyCreateEd
 
 builder.Services.AddScoped<IAnalyticService, AnalyticService>();
 
-builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
-
 builder.Services.AddHostedService<KafkaConsumer>();
+
+var bootstrapServers = builder.Configuration.GetConnectionString("KafkaDefaultConnection")
+    ?? throw new InvalidOperationException("KafkaDefaultConnection is not set");
 
 builder.Services.AddSingleton(sp =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
     var settings = sp.GetRequiredService<IOptions<KafkaSettings>>().Value;
-
-    settings.BootstrapServers = config.GetConnectionString("KafkaDefaultConnection")
-        ?? throw new InvalidOperationException("KafkaDefaultConnection is not set");
 
     var consumerConfig = new ConsumerConfig
     {
-        BootstrapServers = settings.BootstrapServers,
+        BootstrapServers = bootstrapServers,
         GroupId = settings.GroupId,
         EnableAutoCommit = settings.AutoCommitEnabled,
         FetchMinBytes = settings.FetchMinBytes,
