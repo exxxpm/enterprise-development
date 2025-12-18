@@ -7,12 +7,6 @@
 public class KafkaSettings
 {
     /// <summary>
-    /// Kafka bootstrap servers (connection string).
-    /// Set via Aspire ConnectionStrings:KafkaDefaultConnection.
-    /// </summary>
-    public string BootstrapServers { get; set; } = default!;
-
-    /// <summary>
     /// Kafka topic to which messages will be produced. Default is "applications".
     /// </summary>
     public string Topic { get; set; } = "applications";
